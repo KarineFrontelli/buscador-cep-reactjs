@@ -5,43 +5,53 @@ import api from "./services/api";
 import "./style.css";
 
 function App() {
+  const [input, setInput] = useState("");
+  const [cep, setCep] = useState({});
 
-  const [input, setInput] = useState('');
-
- async function handleSearch() {
-  if (input === '') {
-    alert('Digite o CEP')
-    return
+  async function handleSearch() {
+    if (input === "") {
+      alert("Digite o CEP");
+      return;
+    }
+    try {
+      const response = await api.get(`${input}/json`);
+      setCep(response.data);
+      setInput("");
+    } catch (error) {
+      alert("Erro ao buscar");
+      setInput("");
+    }
   }
-  try {
-    const response = await api.get(`${input}/json`);
-    console.log(response.data)
-  } catch (error) {
-    alert('Erro ao buscar')
-    setInput('')
-  }
- }
 
   return (
     <div className="App-container">
       <h1 className="App-title">Buscador de CEP</h1>
 
       <div className="App-container-input">
-        <input type="text" placeholder="Digite seu CEP" value={input} onChange={(e) => setInput(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Digite seu CEP"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
 
         <button className="App-button" onClick={handleSearch}>
           <FiSearch size={25} color="#fff" />
         </button>
       </div>
 
-      <main className="App-main">
-        <h2>CEP:</h2>
+      {Object.keys(cep).length > 0 && (
+        <main className="App-main">
+          <h2>CEP:{cep.cep}</h2>
 
-        <span>Rua:</span>
-        <span>Complemento:</span>
-        <span>Bairro:</span>
-        <span>Cidade:</span>
-      </main>
+          <span>{cep.logradouro}</span>
+          <span>{cep.complemento}</span>
+          <span>{cep.bairro}</span>
+          <span>{cep.localidade} - {cep.uf}</span>
+
+        </main>
+      )}
+      
     </div>
   );
 }
